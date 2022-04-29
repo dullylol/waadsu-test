@@ -21,6 +21,6 @@ class MainViewModel @Inject constructor(
     }
 
     fun onActivityCreated() {
-        // TODO - Implement
+        mainRouter.openStartScreen()
     }
 }
