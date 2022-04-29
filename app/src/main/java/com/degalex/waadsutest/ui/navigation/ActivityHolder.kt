@@ -10,8 +10,6 @@ class ActivityHolder @Inject constructor() {
     var activity: AppCompatActivity? = null
         private set
 
-    val fragmentManager by lazy { activity?.supportFragmentManager }
-
     fun attachActivity(activity: AppCompatActivity) {
         this.activity = activity
     }

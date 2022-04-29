@@ -3,6 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.degalex.waadsutest">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".WaadsuTestApp"
         android:allowBackup="true"
@@ -24,6 +26,10 @@
             </intent-filter>
 
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAj03WzU-WP85A29H3fcJsdrVXpc0tTn7o" />
 
     </application>
 

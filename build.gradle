@@ -32,4 +32,5 @@ ext {
     retrofit_version = "2.9.0"
     converter_gson_version = "2.9.0"
     interceptor_version = "4.9.3"
+    google_maps_version = "18.0.2"
 }
