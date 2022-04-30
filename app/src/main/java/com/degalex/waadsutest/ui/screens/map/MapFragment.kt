@@ -1,5 +1,6 @@
 package com.degalex.waadsutest.ui.screens.map
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.degalex.waadsutest.databinding.FragmentMapBinding
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,6 +23,8 @@ class MapFragment : Fragment() {
 
     private lateinit var googleMap: GoogleMap
 
+    private var lastSelectedPolygon: Polygon? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -28,17 +32,13 @@ class MapFragment : Fragment() {
     ): View {
         binding = FragmentMapBinding.inflate(layoutInflater, container, false)
         binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync(::onMapReady)
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.mapView.getMapAsync {
-            googleMap = it
-            mapViewModel.onMapReady()
-        }
 
         lifecycleScope.launchWhenCreated {
 
@@ -49,9 +49,25 @@ class MapFragment : Fragment() {
                         .addAll(island.coordinates)
                         .strokeWidth(5f)
 
-                    googleMap.addPolygon(polygonOptions)
+                    googleMap.addPolygon(polygonOptions).isClickable = true
                 }
             }
+        }
+    }
+
+    private fun onMapReady(googleMap: GoogleMap) {
+        this.googleMap = googleMap
+
+        mapViewModel.onMapReady()
+
+        googleMap.setOnPolygonClickListener { polygon ->
+            lastSelectedPolygon?.fillColor = Color.TRANSPARENT
+            lastSelectedPolygon?.strokeColor = Color.BLACK
+
+            polygon.fillColor = Color.CYAN
+            polygon.strokeColor = Color.RED
+
+            lastSelectedPolygon = polygon
         }
     }
 
