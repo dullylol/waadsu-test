@@ -2,6 +2,11 @@
 
     <string name="app_name">Waadsu test</string>
 
-    <string name="open_map">Open map</string>
+    <!-- Start screen -->
+    <string name="button_open_map">Open map</string>
+
+    <!-- Map screen -->
+    <string name="format_territory_length">Territory length: %d km</string>
+    <string name="format_selected_territory_length">Selected territory length: %d km</string>
 
 </resources>

@@ -2,13 +2,12 @@ package com.degalex.waadsutest.domain.interactors
 
 import com.degalex.waadsutest.domain.entities.Island
 import com.degalex.waadsutest.domain.entities.Territory
+import com.degalex.waadsutest.domain.extesions.distanceTo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
 import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 @ViewModelScoped
 class GetConcatenatedTerritoryInteractor @Inject constructor() {
@@ -33,7 +32,7 @@ class GetConcatenatedTerritoryInteractor @Inject constructor() {
 
                     island1Coordinates.forEachIndexed { index1, latLng1 ->
                         island2Coordinates.forEachIndexed { index2, latLng2 ->
-                            if (getDistance(latLng1, latLng2) < DISTANCE_ERROR) {
+                            if (latLng1 distanceTo latLng2 < DISTANCE_ERROR) {
                                 island1IndexesToRemove.add(index1)
                                 island2IndexesToRemove.add(index2)
                             }
@@ -100,11 +99,6 @@ class GetConcatenatedTerritoryInteractor @Inject constructor() {
                 || abs(island1Bounds.northeast.latitude - island2Bounds.southwest.latitude) < DISTANCE_ERROR
                 || abs(island1Bounds.southwest.longitude - island2Bounds.northeast.longitude) < DISTANCE_ERROR
                 || abs(island1Bounds.southwest.latitude - island2Bounds.northeast.latitude) < DISTANCE_ERROR
-    }
-
-    private fun getDistance(point1: LatLng, point2: LatLng): Double {
-        return sqrt((point1.latitude - point2.latitude).pow(2.0)
-                + (point1.longitude - point2.longitude).pow(2.0))
     }
 
     companion object {
