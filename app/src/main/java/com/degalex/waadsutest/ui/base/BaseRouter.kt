@@ -18,7 +18,7 @@ abstract class BaseRouter(
         @IdRes containerViewId: Int,
         fragment: Fragment,
     ) {
-        activityHolder.fragmentManager?.commit {
+        activityHolder.activity?.supportFragmentManager?.commit {
             add(containerViewId, fragment)
             addToBackStack(null)
         }
@@ -28,7 +28,7 @@ abstract class BaseRouter(
         @IdRes containerViewId: Int,
         fragment: Fragment,
     ) {
-        activityHolder.fragmentManager?.commit {
+        activityHolder.activity?.supportFragmentManager?.commit {
             replace(containerViewId, fragment)
         }
     }

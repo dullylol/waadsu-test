@@ -10,7 +10,7 @@ import com.degalex.waadsutest.databinding.FragmentStartBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class StartFragment private constructor() : Fragment() {
+class StartFragment : Fragment() {
 
     private lateinit var binding: FragmentStartBinding
 
