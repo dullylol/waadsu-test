@@ -20,7 +20,7 @@ class MainViewModel @Inject constructor(
         activityHolder.detachActivity()
     }
 
-    fun onActivityCreated() {
+    fun onStartFirstScreen() {
         mainRouter.openStartScreen()
     }
 }
