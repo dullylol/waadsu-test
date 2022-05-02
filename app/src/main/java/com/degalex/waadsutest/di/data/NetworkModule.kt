@@ -1,8 +1,8 @@
 package com.degalex.waadsutest.di.data
 
 import com.degalex.waadsutest.BuildConfig
-import com.degalex.waadsutest.data.remote.datasources.WaadsuApiCalls
-import com.degalex.waadsutest.data.remote.interceptors.ErrorHandlingInterceptor
+import com.degalex.waadsutest.data.datasources.network.WaadsuApiCalls
+import com.degalex.waadsutest.data.utils.interceptors.ErrorHandlingInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

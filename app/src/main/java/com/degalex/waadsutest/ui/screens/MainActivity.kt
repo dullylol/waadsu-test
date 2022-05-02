@@ -20,7 +20,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         mainViewModel.onAttachActivity(this)
-        mainViewModel.onActivityCreated()
+
+        if (savedInstanceState == null) {
+            mainViewModel.onStartFirstScreen()
+        }
     }
 
     override fun onDestroy() {

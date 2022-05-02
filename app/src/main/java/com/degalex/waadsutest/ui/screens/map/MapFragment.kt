@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MapFragment : Fragment() {
@@ -28,7 +29,7 @@ class MapFragment : Fragment() {
 
     private val mapViewModel: MapViewModel by viewModels()
 
-    private lateinit var googleMap: GoogleMap
+    private var googleMap: GoogleMap? = null
 
     private var lastSelectedPolygon: Polygon? = null
 
@@ -44,57 +45,10 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-
-            mapViewModel.loadingStateFlow.collect { loading ->
-
-                binding.progressIndicator.isVisible = loading
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-
-            mapViewModel.errorStateFlow.collect { throwable ->
-
-                if (throwable != null) {
-                    Toast.makeText(context, throwable.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-
-            mapViewModel.coordinatesStateFlow.collect { territory ->
-
-                animateCameraToTerritory(territory)
-                addTerritoryPolygons(territory)
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-
-            mapViewModel.territoryLengthStateFlow.collect { territoryLength ->
-
-                binding.territoryLengthTextView.text =
-                    getString(R.string.format_territory_length, territoryLength)
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-
-            mapViewModel.selectedIslandLengthStateFlow.collect { islandLength ->
-
-                binding.selectedIslandLengthTextView.text =
-                    getString(R.string.format_selected_territory_length, islandLength)
-            }
-        }
-    }
-
     private fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
+
+        setupObservers()
 
         mapViewModel.onMapReady()
 
@@ -138,6 +92,54 @@ class MapFragment : Fragment() {
         binding.mapView.onSaveInstanceState(outState)
     }
 
+    private fun setupObservers() {
+
+        lifecycleScope.launch {
+
+            mapViewModel.loadingStateFlow.collect { loading ->
+
+                binding.progressIndicator.isVisible = loading
+            }
+        }
+
+        lifecycleScope.launch {
+
+            mapViewModel.errorStateFlow.collect { throwable ->
+
+                if (throwable != null) {
+                    Toast.makeText(context, throwable.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+
+            mapViewModel.coordinatesStateFlow.collect { territory ->
+
+                animateCameraToTerritory(territory)
+                addTerritoryPolygons(territory)
+            }
+        }
+
+        lifecycleScope.launch {
+
+            mapViewModel.territoryLengthStateFlow.collect { territoryLength ->
+
+                binding.territoryLengthTextView.text =
+                    getString(R.string.format_territory_length, territoryLength)
+            }
+        }
+
+        lifecycleScope.launch {
+
+            mapViewModel.selectedIslandLengthStateFlow.collect { islandLength ->
+
+                binding.selectedIslandLengthTextView.text =
+                    getString(R.string.format_selected_territory_length, islandLength)
+            }
+        }
+    }
+
     private fun animateCameraToTerritory(territory: Territory) {
         if (territory.islands.isEmpty()) {
             return
@@ -146,7 +148,7 @@ class MapFragment : Fragment() {
         val boundsBuilder = LatLngBounds.Builder()
 
         territory.islands.maxByOrNull { it.coordinates.size }?.coordinates?.forEach(boundsBuilder::include)
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 0))
+        googleMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 0))
     }
 
     private fun addTerritoryPolygons(territory: Territory) {
@@ -155,7 +157,7 @@ class MapFragment : Fragment() {
                 .addAll(island.coordinates)
                 .strokeWidth(5f)
 
-            googleMap.addPolygon(polygonOptions).isClickable = true
+            googleMap?.addPolygon(polygonOptions)?.isClickable = true
         }
     }
 
