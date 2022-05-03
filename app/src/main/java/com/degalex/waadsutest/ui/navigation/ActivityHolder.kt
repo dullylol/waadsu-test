@@ -1,11 +1,8 @@
 package com.degalex.waadsutest.ui.navigation
 
 import androidx.appcompat.app.AppCompatActivity
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class ActivityHolder @Inject constructor() {
+class ActivityHolder {
 
     var activity: AppCompatActivity? = null
         private set
