@@ -35,6 +35,7 @@ class StartFragment : Fragment() {
 
     companion object {
 
+        // Создаем таким образом фрагменты для дальнейшей удобной работы с arguments
         fun newInstance(): StartFragment {
             return StartFragment()
         }

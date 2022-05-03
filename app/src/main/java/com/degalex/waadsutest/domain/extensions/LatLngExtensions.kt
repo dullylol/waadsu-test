@@ -3,11 +3,13 @@ package com.degalex.waadsutest.domain.extensions
 import com.google.android.gms.maps.model.LatLng
 import kotlin.math.*
 
+// Нахождение растояния между двумя точками
 infix fun LatLng.distanceTo(latLng: LatLng): Double {
     return sqrt((latitude - latLng.latitude).pow(2.0)
             + (longitude - latLng.longitude).pow(2.0))
 }
 
+// Нахождение растояния в метрах между двумя точками
 infix fun LatLng.distanceToInMeters(latLng: LatLng): Double {
     val earthRadius = 6378.137
     val dLat = latLng.latitude * Math.PI / 180 - latitude * Math.PI / 180;

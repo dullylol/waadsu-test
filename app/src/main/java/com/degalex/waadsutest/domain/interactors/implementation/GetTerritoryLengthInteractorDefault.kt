@@ -6,6 +6,7 @@ import com.degalex.waadsutest.domain.interactors.interfaces.GetIslandLengthInter
 import com.degalex.waadsutest.domain.interactors.interfaces.GetTerritoryLengthInteractor
 import javax.inject.Inject
 
+// Класс для работы с бизнес-логикой - получение периметра острова
 class GetTerritoryLengthInteractorDefault @Inject constructor(
     @Default private val getIslandLengthInteractor: GetIslandLengthInteractor,
 ) : GetTerritoryLengthInteractor {

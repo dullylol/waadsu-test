@@ -7,23 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.degalex.waadsutest.R
 import com.degalex.waadsutest.databinding.FragmentMapBinding
 import com.degalex.waadsutest.domain.entities.Island
 import com.degalex.waadsutest.domain.entities.Territory
+import com.degalex.waadsutest.ui.base.BaseFragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MapFragment : Fragment() {
+class MapFragment : BaseFragment() {
 
     private lateinit var binding: FragmentMapBinding
 
@@ -53,7 +51,7 @@ class MapFragment : Fragment() {
         mapViewModel.onMapReady()
 
         googleMap.setOnPolygonClickListener { polygon ->
-            selectPolygon(polygon)
+            onPolygonClick(polygon)
         }
     }
 
@@ -92,51 +90,32 @@ class MapFragment : Fragment() {
         binding.mapView.onSaveInstanceState(outState)
     }
 
+    // Обсерверы для всех StateFlow во вьюмодели. При смене значения StateFlow сразу же меняется UI
     private fun setupObservers() {
 
-        lifecycleScope.launch {
+        mapViewModel.loadingStateFlow.collectInCoroutine { loading ->
+            binding.progressIndicator.isVisible = loading
+        }
 
-            mapViewModel.loadingStateFlow.collect { loading ->
-
-                binding.progressIndicator.isVisible = loading
+        mapViewModel.errorStateFlow.collectInCoroutine { throwable ->
+            if (throwable != null) {
+                Toast.makeText(context, throwable.message, Toast.LENGTH_SHORT).show()
             }
         }
 
-        lifecycleScope.launch {
-
-            mapViewModel.errorStateFlow.collect { throwable ->
-
-                if (throwable != null) {
-                    Toast.makeText(context, throwable.message, Toast.LENGTH_SHORT).show()
-                }
-            }
+        mapViewModel.coordinatesStateFlow.collectInCoroutine { territory ->
+            animateCameraToTerritory(territory)
+            addTerritoryPolygons(territory)
         }
 
-        lifecycleScope.launch {
-
-            mapViewModel.coordinatesStateFlow.collect { territory ->
-
-                animateCameraToTerritory(territory)
-                addTerritoryPolygons(territory)
-            }
+        mapViewModel.territoryLengthStateFlow.collectInCoroutine { territoryLength ->
+            binding.territoryLengthTextView.text =
+                getString(R.string.format_territory_length, territoryLength)
         }
 
-        lifecycleScope.launch {
-
-            mapViewModel.territoryLengthStateFlow.collect { territoryLength ->
-
-                binding.territoryLengthTextView.text =
-                    getString(R.string.format_territory_length, territoryLength)
-            }
-        }
-
-        lifecycleScope.launch {
-
-            mapViewModel.selectedIslandLengthStateFlow.collect { islandLength ->
-
-                binding.selectedIslandLengthTextView.text =
-                    getString(R.string.format_selected_territory_length, islandLength)
-            }
+        mapViewModel.selectedIslandLengthStateFlow.collectInCoroutine { islandLength ->
+            binding.selectedIslandLengthTextView.text =
+                getString(R.string.format_selected_territory_length, islandLength)
         }
     }
 
@@ -151,6 +130,7 @@ class MapFragment : Fragment() {
         googleMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 0))
     }
 
+    // Отрисовка полигонов по координатам, переданным в объекте класса Territory
     private fun addTerritoryPolygons(territory: Territory) {
         territory.islands.forEach { island ->
             val polygonOptions = PolygonOptions()
@@ -161,13 +141,12 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun selectPolygon(polygon: Polygon) {
-        lastSelectedPolygon?.fillColor = Color.TRANSPARENT
-        lastSelectedPolygon?.strokeColor = Color.BLACK
+    // Обработчик нажатия на полигон
+    private fun onPolygonClick(polygon: Polygon) {
+        paintPolygonInDefaultColor(lastSelectedPolygon)
 
         if (polygon != lastSelectedPolygon) {
-            polygon.fillColor = Color.CYAN
-            polygon.strokeColor = Color.RED
+            paintPolygonInRedColor(polygon)
 
             mapViewModel.onIslandClicked(Island(coordinates = polygon.points))
 
@@ -179,8 +158,21 @@ class MapFragment : Fragment() {
         }
     }
 
+    // Заполнение полигона стандартным цветом
+    private fun paintPolygonInDefaultColor(polygon: Polygon?) {
+        polygon?.fillColor = Color.TRANSPARENT
+        polygon?.strokeColor = Color.BLACK
+    }
+
+    // Заполнение полигона другим цветом
+    private fun paintPolygonInRedColor(polygon: Polygon?) {
+        polygon?.fillColor = Color.CYAN
+        polygon?.strokeColor = Color.RED
+    }
+
     companion object {
 
+        // Создаем таким образом фрагменты для дальнейшей удобной работы с arguments
         fun newInstance(): MapFragment {
             return MapFragment()
         }
