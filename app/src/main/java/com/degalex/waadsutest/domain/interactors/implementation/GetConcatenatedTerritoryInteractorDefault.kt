@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import javax.inject.Inject
 import kotlin.math.abs
 
+// Класс для работы с бизнес-логикой - получение соедененных островов
 class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
 ) : GetConcatenatedTerritoryInteractor {
 
@@ -19,17 +20,21 @@ class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
     private fun getConcatenatedTerritory(territory: Territory): Territory {
         val concatenatedIslands = territory.islands.toMutableList()
 
+        // Сравниваем каждый остров с каждым
         concatenatedIslands.forEachIndexed { island1Index, island1 ->
             concatenatedIslands.forEachIndexed { island2Index, island2 ->
 
+                // Находим острова, которые расположены рядом
                 if (island1Index != island2Index && areIslandsNear(island1, island2)) {
 
+                    // Индексы точек островов, которые нужно удалить для их соединения
                     val island1IndexesToRemove = mutableSetOf<Int>()
                     val island2IndexesToRemove = mutableSetOf<Int>()
 
                     val island1Coordinates = island1.coordinates.toMutableList()
                     val island2Coordinates = island2.coordinates.toMutableList()
 
+                    // Ищем точки, которые расположены рядом и добавляем в лист для удаления
                     island1Coordinates.forEachIndexed { index1, latLng1 ->
                         island2Coordinates.forEachIndexed { index2, latLng2 ->
                             if (latLng1 distanceTo latLng2 < DISTANCE_ERROR) {
@@ -41,19 +46,25 @@ class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
 
                     if (island1IndexesToRemove.isNotEmpty()) {
 
+                        // Находим начальные точки островов, от куда произведется удаления, и из
+                        // которых нужно будет соеденять оставшиеся точки островов
                         val startConcatPoint1Index = island1IndexesToRemove.minOrNull()!!
                         val startConcatPoint2Index = island2IndexesToRemove.minOrNull()!!
 
+                        // Лист для правильного порядка точек второго остова
                         val orderedIsland2Coordinates = mutableListOf<LatLng>()
 
+                        // Удаляем токи с конца по индексу, чтоб индексы элементов не сместились
                         for (index in island1IndexesToRemove.sortedDescending()) {
                             island1Coordinates.removeAt(index)
                         }
 
+                        // Удаляем индексы у второго острова
                         for (index in island2IndexesToRemove.sortedDescending()) {
                             island2Coordinates.removeAt(index)
                         }
 
+                        // Нахождение правильного порядка точек второго острова
                         for (i in startConcatPoint2Index until island2Coordinates.size) {
                             orderedIsland2Coordinates.add(island2Coordinates[i])
                         }
@@ -62,12 +73,15 @@ class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
                             orderedIsland2Coordinates.add(island2Coordinates[i])
                         }
 
+                        // Добаление точек второго острова к точкам первого
                         island1Coordinates.addAll(startConcatPoint1Index, orderedIsland2Coordinates)
 
+                        // Первый остров обновляем в листе всех островов
                         concatenatedIslands[island1Index] = concatenatedIslands[island1Index].copy(
                             coordinates = island1Coordinates,
                         )
 
+                        // Второй остров очищаем, чтоб потом удалить
                         concatenatedIslands[island2Index] = concatenatedIslands[island2Index].copy(
                             coordinates = emptyList(),
                         )
@@ -76,11 +90,13 @@ class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
             }
         }
 
+        // Удаляем пустые острова
         concatenatedIslands.removeAll { it.coordinates.isEmpty() }
 
         return Territory(concatenatedIslands)
     }
 
+    // Поиск точек, которые расположены рядом
     private fun areIslandsNear(island1: Island, island2: Island): Boolean {
         if (island1.coordinates.isEmpty() || island2.coordinates.isEmpty()) {
             return false
@@ -103,6 +119,7 @@ class GetConcatenatedTerritoryInteractorDefault @Inject constructor(
 
     companion object {
 
+        // Погрешность, при которой считается, что точки находятся рядом
         private const val DISTANCE_ERROR = 0.001
     }
 }

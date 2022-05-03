@@ -5,6 +5,7 @@ import com.degalex.waadsutest.domain.entities.Territory
 import com.google.android.gms.maps.model.LatLng
 import javax.inject.Inject
 
+// Класс для преобразования данных из интернета в сущность, с которой удобно работать
 class TerritoryMapper @Inject constructor() {
 
     fun toDomain(coordinatesNetwork: List<List<List<List<Double>>>>): Territory {

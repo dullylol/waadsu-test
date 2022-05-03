@@ -27,24 +27,30 @@ class MapViewModel @Inject constructor(
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseViewModel() {
 
+    // StateFlow для координат, по которым происходит отрисовка
     private val coordinatesMutableStateFlow = MutableStateFlow(Territory(emptyList()))
     val coordinatesStateFlow = coordinatesMutableStateFlow.asStateFlow()
 
+    // StateFlow для периметра всей территории
     private val territoryLengthMutableStateFlow = MutableStateFlow(0)
     val territoryLengthStateFlow = territoryLengthMutableStateFlow.asStateFlow()
 
+    // StateFlow для периметра выбранного учатска территории
     private val selectedIslandLengthMutableStateFlow = MutableStateFlow(0)
     val selectedIslandLengthStateFlow = selectedIslandLengthMutableStateFlow.asStateFlow()
 
+    // StateFlow для загрузки
     private val loadingMutableStateFlow = MutableStateFlow(false)
     val loadingStateFlow = loadingMutableStateFlow.asStateFlow()
 
+    // Переопределенный метод обработки ошибок в корутине
     override fun onCoroutineError(throwable: Throwable) {
         super.onCoroutineError(throwable)
 
         loadingMutableStateFlow.value = false
     }
 
+    // Начальные действия при создании карты: получение нужных точек и периметра
     fun onMapReady() {
         if (coordinatesStateFlow.value.islands.isNotEmpty()) {
             return
@@ -63,6 +69,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    // Обработка нажатия на какой-то отдельный регион
     fun onIslandClicked(island: Island?) {
         launchSafely(defaultDispatcher) {
             selectedIslandLengthMutableStateFlow.value = getIslandLengthInteractor(island)

@@ -8,6 +8,8 @@ import com.degalex.waadsutest.domain.interactors.interfaces.GetTerritoryInteract
 import com.degalex.waadsutest.domain.mappers.TerritoryMapper
 import javax.inject.Inject
 
+// Класс для работы с бизнес-логикой - получение всех островов из апишки и пробразование данных
+// в удобные сущности
 class GetTerritoryInteractorDefault @Inject constructor(
     @Network private val coordinatesRepository: CoordinatesRepository,
     private val territoryMapper: TerritoryMapper,

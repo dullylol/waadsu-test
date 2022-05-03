@@ -5,6 +5,7 @@ import com.degalex.waadsutest.domain.extensions.distanceToInMeters
 import com.degalex.waadsutest.domain.interactors.interfaces.GetIslandLengthInteractor
 import javax.inject.Inject
 
+// Класс для работы с бизнес-логикой - получение периметра острова
 class GetIslandLengthInteractorDefault @Inject constructor() : GetIslandLengthInteractor {
 
     override operator fun invoke(island: Island?): Int {
